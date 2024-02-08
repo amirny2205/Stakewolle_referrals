@@ -22,6 +22,6 @@ class ReferralCode(models.Model):
 
 class User(AbstractUser):
     referral_code_for_registration = models.ForeignKey(
-        ReferralCode, on_delete=models.CASCADE,
+        ReferralCode, on_delete=models.SET_NULL,
         related_name="referral_code_set",
         null=True, blank=True)

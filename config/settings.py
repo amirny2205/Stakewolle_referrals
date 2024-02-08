@@ -157,8 +157,6 @@ DJOSER = {
 }
 
 
-
-
 AUTH_USER_MODEL = "users.User"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
