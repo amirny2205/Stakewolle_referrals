@@ -2,11 +2,12 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.http import HttpResponseBadRequest
 from django.utils import timezone
-import random
+import random, string
 
 
 def generate_random_code():
-    return "".join([chr(random.randrange(48, 123)) for y in range(64)])
+    letters = string.ascii_lowercase
+    return "".join([random.choice(letters) for y in range(64)])
 
 
 class ReferralCode(models.Model):
