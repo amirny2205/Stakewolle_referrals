@@ -1,4 +1,8 @@
+# emacs
+*~
+
 # Byte-compiled / optimized / DLL files
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -121,7 +125,6 @@ celerybeat.pid
 
 # Environments
 .env
-.env~
 .venv
 env/
 venv/
