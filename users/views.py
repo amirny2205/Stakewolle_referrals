@@ -75,10 +75,13 @@ class GetReferrals(mixins.ListModelMixin,
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.exclude(
-            referral_code_for_registration__not_in=self.
-            request.user.referral_code_set)
-        return queryset
+        new_queryset = []
+        rcs = self.request.user.referral_code_set.all()
+        for obj in queryset:
+            if obj.referral_code_for_registration is not None \
+               and obj.referral_code_for_registration in rcs:
+                new_queryset.append(obj)
+        return new_queryset
     
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
