@@ -151,7 +151,15 @@ SIMPLE_JWT = {
 DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
     'SET_PASSWORD_RETYPE': False,
+    'SERIALIZERS': {
+         'user_create': 'users.serializers.UserRegistrationSerializer'
+    }
 }
+
+
+
+
+AUTH_USER_MODEL = "users.User"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = ''
@@ -164,3 +172,4 @@ ADMIN_EMAIL = EMAIL_HOST_USER
 SUPPORT_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = ADMIN_EMAIL
 SERVER_EMAIL = ADMIN_EMAIL
+

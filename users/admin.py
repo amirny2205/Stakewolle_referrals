@@ -3,3 +3,4 @@ from .models import *
 
 
 admin.site.register(ReferralCode)
+admin.site.register(User)
