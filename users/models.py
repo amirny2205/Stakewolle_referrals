@@ -15,7 +15,7 @@ class ReferralCode(models.Model):
                                 default=generate_random_code)
     active = models.BooleanField(default=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE,
-                             related_name="user_set")
+                             related_name="referral_code_set")
     expiry_date = models.DateTimeField()
 
     def save(self, *args, **kwargs):
@@ -41,5 +41,5 @@ class ReferralCode(models.Model):
 class User(AbstractUser):
     referral_code_for_registration = models.ForeignKey(
         ReferralCode, on_delete=models.SET_NULL,
-        related_name="referral_code_set",
+        related_name="user_set",
         null=True, blank=True)

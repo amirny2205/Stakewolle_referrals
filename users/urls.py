@@ -1,4 +1,4 @@
-from .views import UserViewSetUpdated, ReferralCodeList, ReferralCodeDetail
+from .views import UserViewSetUpdated, ReferralCodeList, ReferralCodeDetail, GetReferrals
 from rest_framework.routers import DefaultRouter
 from django.urls import path
 
@@ -11,4 +11,5 @@ urlpatterns = router.urls
 urlpatterns += [
     path('my_referral_codes/', ReferralCodeList.as_view()),
     path('my_referral_codes/<str:pk>/', ReferralCodeDetail.as_view()),
+    path('my_referrals/', GetReferrals.as_view()),
 ]
