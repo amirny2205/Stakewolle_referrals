@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.http import HttpResponseBadRequest
-from django.utils import timezone
+from django.db.models import Q, UniqueConstraint
 import random, string
 
 
@@ -25,6 +24,15 @@ class ReferralCode(models.Model):
                 pk=self.pk
             ).update(active=False)
         super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["user", "active"],
+                condition=Q(is_active=True),
+                name="unique_active_code_for_user",
+            )
+        ]
 
     def __str__(self):
         return self.code_str

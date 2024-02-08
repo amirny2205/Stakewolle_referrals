@@ -65,22 +65,3 @@ class ReferralCodeDetail(generics.RetrieveUpdateDestroyAPIView):
         queryset = super().get_queryset()
         queryset = queryset.filter(user=self.request.user)
         return queryset
-
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        if 'active' in request.data.keys():
-            self.get_queryset().filter(
-                user=request.user, active=True).exclude(
-                pk=kwargs['pk']
-            ).update(active=False)
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-
-        return Response(serializer.data)
