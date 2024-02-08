@@ -16,6 +16,13 @@ class ReferralCode(models.Model):
                              related_name="user_set")
     expiry_date = models.DateTimeField()
 
+    def save(self, *args, **kwargs):
+        if self.active:
+            ReferralCode.objects.filter(user=self.user, active=True).exclude(
+                pk=self.pk
+            ).update(active=False)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.code_str
 
