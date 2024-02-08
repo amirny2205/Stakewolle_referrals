@@ -10,6 +10,8 @@ from .models import ReferralCode
 from .serializers import ReferralCodeSerializer
 from rest_framework import generics
 from djoser.serializers import UserSerializer
+from django.core.mail import send_mail
+from django.conf import settings as project_settings
 
 User = get_user_model()
 
@@ -53,6 +55,16 @@ class ReferralCodeList(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+        
+        if 'send_mail' in request.data.keys() and \
+           request.data['send_mail'] == True:
+            send_mail(
+                "Your referral code",
+                serializer.data['code_str'],
+                project_settings.EMAIL_HOST_USER,
+                [request.user.email],
+                fail_silently=False,
+            )
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED, headers=headers)
