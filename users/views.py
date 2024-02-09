@@ -21,12 +21,12 @@ User = get_user_model()
 
 
 def es(view):
-    '''exclude_schema exclude hsort version'''
+    '''exclude_schema exclude short version'''
     return extend_schema(exclude=True)(view)
 
 
 class UserViewSetUpdated(UserViewSet):
-    serializer_class = serializers.UserSerializer
+    serializer_class = settings.SERIALIZERS.user
     queryset = User.objects.all()
     permission_classes = settings.PERMISSIONS.user
     token_generator = default_token_generator
@@ -34,7 +34,7 @@ class UserViewSetUpdated(UserViewSet):
 
     def create(self, request, *args, **kwargs):
         '''Create user'''
-        serializer = self.get_serializer(data=request.data)
+        serializer = serializers.UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if 'referral_code_for_registration' in serializer.validated_data:
             if serializer.validated_data['referral_code_for_registration'].\
