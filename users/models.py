@@ -30,7 +30,7 @@ class ReferralCode(models.Model):
         constraints = [
             UniqueConstraint(
                 fields=["user", "active"],
-                condition=Q(is_active=True),
+                condition=Q(active=True),
                 name="unique_active_code_for_user",
             )
         ]

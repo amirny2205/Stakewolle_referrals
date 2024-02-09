@@ -74,7 +74,7 @@ EMAIL_USE_TLS = True
 
 `POST http://127.0.0.1:8000/auth/users/`
 
-в передаём:
+в теле запроса передаём:
 
 `{"username": "tmp_user_25", "password": "tmppassword2000!", "email": "your_real_email@wewilltestit.ru"}`
 
@@ -100,7 +100,7 @@ EMAIL_USE_TLS = True
 
 `{"expiry_date":"2024-03-08T12:33:01Z", "send_mail": false}`
 
-если креденшиалс для отправки емейла настроены в .env и в settings.py,
+если отправка емейла настроены в .env и в settings.py,
 можно проставить `"send_mail": true`
 
 
@@ -114,7 +114,7 @@ EMAIL_USE_TLS = True
 
 получить, отредактировать или удалить реферральный код по эндпоинту
 `http://127.0.0.1:8000/my_referral_codes/{code_str}` , используя
-запросы GET, PUT, PATCH(в этом случае необходимо в теле передать
+запросы GET, PUT, PATCH(в этом случае необходимо в теле запросы передать
 `"partial": true"`), DELETE
 
 
@@ -130,7 +130,7 @@ EMAIL_USE_TLS = True
 
 `POST http://127.0.0.1:8000/auth/users/`
 
-в теле:
+в теле передаём:
 
 `{"username": "tmp_user_26", "password": "tmppassword2000!", "email":
 "my_email@yandex.ru", "referral_code_for_registration":
