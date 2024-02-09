@@ -26,7 +26,7 @@ def es(view):
 
 
 class UserViewSetUpdated(UserViewSet):
-    serializer_class = settings.SERIALIZERS.user
+    serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
     permission_classes = settings.PERMISSIONS.user
     token_generator = default_token_generator
@@ -36,12 +36,13 @@ class UserViewSetUpdated(UserViewSet):
         '''Create user'''
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if serializer.validated_data['referral_code_for_registration'].\
-           active is False:
-            return HttpResponseBadRequest("Error: referral code is not active")
-        if serializer.validated_data['referral_code_for_registration'].\
-           expiry_date < timezone.now():
-            return HttpResponseBadRequest("Error: referral code expired")
+        if 'referral_code_for_registration' in serializer.validated_data:
+            if serializer.validated_data['referral_code_for_registration'].\
+               active is False:
+                return HttpResponseBadRequest("Error: referral code is not active")
+            if serializer.validated_data['referral_code_for_registration'].\
+               expiry_date < timezone.now():
+                return HttpResponseBadRequest("Error: referral code expired")
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data,
@@ -125,6 +126,12 @@ class ReferralCodeViewSet(viewsets.ModelViewSet):
 
         if 'send_mail' in request.data.keys() and \
            request.data['send_mail'] is True:
+            if request.user.email == "":
+                return HttpResponseBadRequest("User doesn't have email")
+            if project_settings.EMAIL_HOST_USER == '' or \
+               project_settings.EMAIL_HOST_USER == '':
+                return HttpResponseBadRequest(
+                    ".env has incorrect EMAIL_HOST_USER or EMAIL_HOST_USER")
             send_mail(
                 "Your referral code",
                 serializer.data['code_str'],

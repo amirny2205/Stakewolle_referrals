@@ -170,11 +170,8 @@ SIMPLE_JWT = {
 DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
     'SET_PASSWORD_RETYPE': False,
-    'SERIALIZERS': {
-         'user_create': 'users.serializers.UserRegistrationSerializer'
-    },
 }
-    
+
 
 AUTH_USER_MODEL = "users.User"
 
