@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q, UniqueConstraint
-import random, string
+import random
+import string
 
 
 def generate_random_code():

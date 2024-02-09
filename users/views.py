@@ -12,6 +12,10 @@ from rest_framework import generics
 from djoser.serializers import UserSerializer
 from django.core.mail import send_mail
 from django.conf import settings as project_settings
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 User = get_user_model()
 
@@ -27,6 +31,9 @@ class UserViewSetUpdated(UserViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.validated_data['referral_code_for_registration'].\
+           active is False:
+            return HttpResponseBadRequest("Error: referral code is not active")
+        if serializer.validated_data['referral_code_for_registration'].\
            expiry_date < timezone.now():
             return HttpResponseBadRequest("Error: referral code expired")
         self.perform_create(serializer)
@@ -34,8 +41,8 @@ class UserViewSetUpdated(UserViewSet):
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED, headers=headers)
 
-
-class ReferralCodeList(generics.ListCreateAPIView):
+    
+class ReferralCodeViewSet(viewsets.ModelViewSet):
     queryset = ReferralCode.objects.all()
     serializer_class = ReferralCodeSerializer
     
@@ -43,21 +50,16 @@ class ReferralCodeList(generics.ListCreateAPIView):
         queryset = super().get_queryset()
         queryset = queryset.filter(user=self.request.user)
         return queryset
-    
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        ''' More descriptive text '''
         request.data['user'] = request.user.id
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         
         if 'send_mail' in request.data.keys() and \
-           request.data['send_mail'] == True:
+           request.data['send_mail'] is True:
             send_mail(
                 "Your referral code",
                 serializer.data['code_str'],
@@ -69,19 +71,8 @@ class ReferralCodeList(generics.ListCreateAPIView):
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED, headers=headers)
 
-    
-class ReferralCodeDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ReferralCode.objects.all()
-    serializer_class = ReferralCodeSerializer
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(user=self.request.user)
-        return queryset
 
-
-class GetReferrals(mixins.ListModelMixin,
-                   generics.GenericAPIView):
+class ReferralsViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     
@@ -94,6 +85,3 @@ class GetReferrals(mixins.ListModelMixin,
                and obj.referral_code_for_registration in rcs:
                 new_queryset.append(obj)
         return new_queryset
-    
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
