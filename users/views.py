@@ -174,7 +174,10 @@ class ReferralsViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         new_queryset = []
-        rcs = self.request.user.referral_code_set.all()
+        if 'id' not in self.request.data.keys():
+            return []
+        user = User.objects.get(pk=self.request.data['id'])
+        rcs = user.referral_code_set.all()
         for obj in queryset:
             if obj.referral_code_for_registration is not None \
                and obj.referral_code_for_registration in rcs:
@@ -182,6 +185,10 @@ class ReferralsViewSet(viewsets.ModelViewSet):
         return new_queryset
 
     def list(self, request, *args, **kwargs):
+        if 'id' not in self.request.data.keys():
+            return HttpResponseBadRequest(
+                    "please include user 'id' in body")
+
         '''Get a list of users that used any of your referral codes'''
         return super().list(request, *args, **kwargs)
 
