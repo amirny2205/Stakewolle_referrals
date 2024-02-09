@@ -1,18 +1,19 @@
+'''
+I have overriden many methods for swagger to capture it correctly
+'''
 from djoser.views import UserViewSet
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from djoser.conf import settings
 from django.utils import timezone
 from django.http import HttpResponseBadRequest
-from rest_framework import status, mixins
 from rest_framework.response import Response
 from .models import ReferralCode
-from .serializers import ReferralCodeSerializer
-from rest_framework import generics
+from . import serializers
 from djoser.serializers import UserSerializer
 from django.core.mail import send_mail
 from django.conf import settings as project_settings
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -41,18 +42,21 @@ class UserViewSetUpdated(UserViewSet):
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED, headers=headers)
 
-    
+
 class ReferralCodeViewSet(viewsets.ModelViewSet):
     queryset = ReferralCode.objects.all()
-    serializer_class = ReferralCodeSerializer
+    serializer_class = serializers.ReferralCodeSerializer
     
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(user=self.request.user)
         return queryset
 
+    @extend_schema(
+        request=serializers.ReferralCodeViewsetSwaggerSerializerCreate,
+        )
     def create(self, request, *args, **kwargs):
-        ''' More descriptive text '''
+        '''Create new referral code'''
         request.data['user'] = request.user.id
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -71,6 +75,29 @@ class ReferralCodeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED, headers=headers)
 
+    def list(self, request, *args, **kwargs):
+        '''Get referral codes that current user owns'''
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        '''Retrieve a single code by it's code_str'''
+        return super().retrieve(request, *args, **kwargs)
+    
+    @extend_schema(
+        request=serializers.ReferralCodeViewsetSwaggerSerializerUpdate,
+        )
+    def update(self, request, *args, **kwargs):
+        '''Fully update a referral code instance'''
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        '''Partially update a referral code instance'''
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        '''Delete a referral code instance'''
+        return super().destroy(request, *args, **kwargs)
+
 
 class ReferralsViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -85,3 +112,37 @@ class ReferralsViewSet(viewsets.ModelViewSet):
                and obj.referral_code_for_registration in rcs:
                 new_queryset.append(obj)
         return new_queryset
+
+    def list(self, request, *args, **kwargs):
+        '''Get a list of users that used any of your referral codes'''
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        exclude=True
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        exclude=True
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        exclude=True
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        exclude=True
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        exclude=True
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)

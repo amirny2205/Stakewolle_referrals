@@ -514,6 +514,7 @@ paths:
   /my_referral_codes/:
     get:
       operationId: my_referral_codes_list
+      description: Get referral codes that current user owns
       tags:
       - my_referral_codes
       security:
@@ -529,20 +530,20 @@ paths:
           description: ''
     post:
       operationId: my_referral_codes_create
-      description: More descriptive text
+      description: Create new referral code
       tags:
       - my_referral_codes
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReferralCode'
+              $ref: '#/components/schemas/ReferralCodeViewsetSwaggerSerializerCreate'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ReferralCode'
+              $ref: '#/components/schemas/ReferralCodeViewsetSwaggerSerializerCreate'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ReferralCode'
+              $ref: '#/components/schemas/ReferralCodeViewsetSwaggerSerializerCreate'
         required: true
       security:
       - jwtAuth: []
@@ -556,6 +557,7 @@ paths:
   /my_referral_codes/{code_str}/:
     get:
       operationId: my_referral_codes_retrieve
+      description: Retrieve a single code by it's code_str
       parameters:
       - in: path
         name: code_str
@@ -576,6 +578,7 @@ paths:
           description: ''
     put:
       operationId: my_referral_codes_update
+      description: Fully update a referral code instance
       parameters:
       - in: path
         name: code_str
@@ -589,13 +592,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReferralCode'
+              $ref: '#/components/schemas/ReferralCodeViewsetSwaggerSerializerUpdate'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ReferralCode'
+              $ref: '#/components/schemas/ReferralCodeViewsetSwaggerSerializerUpdate'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ReferralCode'
+              $ref: '#/components/schemas/ReferralCodeViewsetSwaggerSerializerUpdate'
         required: true
       security:
       - jwtAuth: []
@@ -608,6 +611,7 @@ paths:
           description: ''
     patch:
       operationId: my_referral_codes_partial_update
+      description: Partially update a referral code instance
       parameters:
       - in: path
         name: code_str
@@ -639,6 +643,7 @@ paths:
           description: ''
     delete:
       operationId: my_referral_codes_destroy
+      description: Delete a referral code instance
       parameters:
       - in: path
         name: code_str
@@ -656,6 +661,7 @@ paths:
   /my_referrals/:
     get:
       operationId: my_referrals_list
+      description: Get a list of users that used any of your referral codes
       tags:
       - my_referrals
       security:
@@ -668,30 +674,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-          description: ''
-    post:
-      operationId: my_referrals_create
-      tags:
-      - my_referrals
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/User'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/User'
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
           description: ''
   /my_referrals/{id}/:
     get:
@@ -714,84 +696,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
-    put:
-      operationId: my_referrals_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user.
-        required: true
-      tags:
-      - my_referrals
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/User'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/User'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
-    patch:
-      operationId: my_referrals_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user.
-        required: true
-      tags:
-      - my_referrals
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
-    delete:
-      operationId: my_referrals_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user.
-        required: true
-      tags:
-      - my_referrals
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
 components:
   schemas:
     Activation:
@@ -860,6 +764,37 @@ components:
         user:
           type: integer
       required:
+      - expiry_date
+      - user
+    ReferralCodeViewsetSwaggerSerializerCreate:
+      type: object
+      properties:
+        expiry_date:
+          type: string
+          format: date-time
+        active:
+          type: boolean
+          default: false
+        send_email:
+          type: boolean
+          default: false
+      required:
+      - expiry_date
+    ReferralCodeViewsetSwaggerSerializerUpdate:
+      type: object
+      properties:
+        expiry_date:
+          type: string
+          format: date-time
+        active:
+          type: boolean
+        user:
+          type: integer
+        code_str:
+          type: string
+      required:
+      - active
+      - code_str
       - expiry_date
       - user
     SendEmailReset:
