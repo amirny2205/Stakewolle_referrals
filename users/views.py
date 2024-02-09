@@ -14,11 +14,15 @@ from djoser.serializers import UserSerializer
 from django.core.mail import send_mail
 from django.conf import settings as project_settings
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
-from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
+
 
 User = get_user_model()
+
+
+def es(view):
+    '''exclude_schema exclude hsort version'''
+    return extend_schema(exclude=True)(view)
 
 
 class UserViewSetUpdated(UserViewSet):
@@ -29,6 +33,7 @@ class UserViewSetUpdated(UserViewSet):
     lookup_field = settings.USER_ID_FIELD
 
     def create(self, request, *args, **kwargs):
+        '''Create user'''
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.validated_data['referral_code_for_registration'].\
@@ -42,11 +47,67 @@ class UserViewSetUpdated(UserViewSet):
         return Response(serializer.data,
                         status=status.HTTP_201_CREATED, headers=headers)
 
+    @es
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @es
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @es
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @es
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        '''Delete current user'''
+        return super().destroy(request, *args, **kwargs)
+
+    @es
+    def me(self, request, *args, **kwargs):
+        return super().me(request, *args, **kwargs)
+
+    @es
+    def activation(self, request, *args, **kwargs):
+        return super().activation(request, *args, **kwargs)
+
+    @es
+    def resend_activation(self, request, *args, **kwargs):
+        return super().resend_activation(request, *args, **kwargs)
+
+    @es
+    def set_password(self, request, *args, **kwargs):
+        return super().set_password(request, *args, **kwargs)
+
+    @es
+    def reset_password(self, request, *args, **kwargs):
+        return super().reset_password(request, *args, **kwargs)
+
+    @es
+    def reset_password_confirm(self, request, *args, **kwargs):
+        return super().reset_password_confirm(request, *args, **kwargs)
+
+    @es
+    def set_username(self, request, *args, **kwargs):
+        return super().set_username(request, *args, **kwargs)
+
+    @es
+    def reset_username(self, request, *args, **kwargs):
+        return super().reset_username(request, *args, **kwargs)
+
+    @es
+    def reset_username_confirm(self, request, *args, **kwargs):
+        return super().reset_username_confirm(request, *args, **kwargs)
+
 
 class ReferralCodeViewSet(viewsets.ModelViewSet):
     queryset = ReferralCode.objects.all()
     serializer_class = serializers.ReferralCodeSerializer
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(user=self.request.user)
@@ -61,7 +122,7 @@ class ReferralCodeViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        
+
         if 'send_mail' in request.data.keys() and \
            request.data['send_mail'] is True:
             send_mail(
@@ -82,10 +143,10 @@ class ReferralCodeViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         '''Retrieve a single code by it's code_str'''
         return super().retrieve(request, *args, **kwargs)
-    
+
     @extend_schema(
         request=serializers.ReferralCodeViewsetSwaggerSerializerUpdate,
-        )
+    )
     def update(self, request, *args, **kwargs):
         '''Fully update a referral code instance'''
         return super().update(request, *args, **kwargs)
@@ -102,7 +163,7 @@ class ReferralCodeViewSet(viewsets.ModelViewSet):
 class ReferralsViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
         new_queryset = []
@@ -117,32 +178,22 @@ class ReferralsViewSet(viewsets.ModelViewSet):
         '''Get a list of users that used any of your referral codes'''
         return super().list(request, *args, **kwargs)
 
-    @extend_schema(
-        exclude=True
-    )
+    @es
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
-    @extend_schema(
-        exclude=True
-    )
+    @es
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @extend_schema(
-        exclude=True
-    )
+    @es
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
-    @extend_schema(
-        exclude=True
-    )
+    @es
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
-    @extend_schema(
-        exclude=True
-    )
+    @es
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
