@@ -64,8 +64,8 @@ class UserViewSetUpdated(UserViewSet):
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
+    @es
     def destroy(self, request, *args, **kwargs):
-        '''Delete current user'''
         return super().destroy(request, *args, **kwargs)
 
     @es
@@ -115,8 +115,8 @@ class ReferralCodeViewSet(viewsets.ModelViewSet):
         return queryset
 
     @extend_schema(
-        request=serializers.ReferralCodeViewsetSwaggerSerializerCreate,
-        )
+        request=serializers.ReferralCodeViewSetSwaggerSerializerCreate,
+    )
     def create(self, request, *args, **kwargs):
         '''Create new referral code'''
         request.data['user'] = request.user.id
@@ -152,7 +152,7 @@ class ReferralCodeViewSet(viewsets.ModelViewSet):
         return super().retrieve(request, *args, **kwargs)
 
     @extend_schema(
-        request=serializers.ReferralCodeViewsetSwaggerSerializerUpdate,
+        request=serializers.ReferralCodeViewSetSwaggerSerializerUpdate,
     )
     def update(self, request, *args, **kwargs):
         '''Fully update a referral code instance'''
@@ -184,17 +184,28 @@ class ReferralsViewSet(viewsets.ModelViewSet):
                 new_queryset.append(obj)
         return new_queryset
 
+    @es
     def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request=serializers.ReferralsViewSetSwaggerSerializerCreate,
+    )
+    def create(self, request, *args, **kwargs):
+        '''Get a list of users that used any of your referral codes'''
         if 'id' not in self.request.data.keys():
             return HttpResponseBadRequest(
                     "please include user 'id' in body")
 
-        '''Get a list of users that used any of your referral codes'''
-        return super().list(request, *args, **kwargs)
+        queryset = self.get_queryset()
 
-    @es
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = UserSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = UserSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     @es
     def retrieve(self, request, *args, **kwargs):
